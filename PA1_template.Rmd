@@ -63,12 +63,22 @@ The steps taken are measured at an interval of 5 minutes, we can use this to see
 library(scales)
 averageatinterval <- aggregate(activities[,1], by = list(activities$interval), mean, na.rm=TRUE);
 
-ggplot(averageatinterval,aes(Group.1, x))+geom_line() + 
+ggplot(averageatinterval,aes(Group.1, x)) +
+  geom_line() + 
   labs(title="Average steps at an specific moment", x="Time", y="Steps taken") + 
   scale_x_continuous(breaks=c(0, 600, 1200, 1800, 2400), 
                      labels=c("00:00, Midnight",  "06:00", "12:00, Noon", "18:00", "24:00"))
 ```
 
+Determine the interval/moment of the maximum mean number of steps taken...
+The number of steps is x, the interval is Group.1
+
+```{r findmaxstesp, echo=TRUE}
+themoment  <- averageatinterval[averageatinterval$x == max(averageatinterval$x),]$Group.1
+
+```
+
+The interval at wich the maximum average of steps taken is at `r themoment`.
 
 
 ## Imputing missing values
