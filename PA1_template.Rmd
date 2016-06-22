@@ -1,20 +1,73 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
 output: 
-  html_document:
-    keep_md: true
+html_document:
+keep_md: true
 ---
 
 
 ## Loading and preprocessing the data
+Assume we're in the correct working directory.
+The data to be processed is in activity.zip in 'root'of assignment. Lets unzip and read the data.
+We use a helper function to coerce the text into a date...
 
+
+```{r unzipload, echo=TRUE}
+unzip("activity.zip");
+
+setClass('myDate');
+setAs("character","myDate", function(from) as.Date(from, format="%Y-%m-%d"));
+
+activities <- read.csv("activity.csv", header=TRUE, sep=",", colClasses = c("integer", "myDate", "integer"));
+
+```
 
 
 ## What is mean total number of steps taken per day?
 
+We could calculate the mean for each day in one step, however we start by determining the total number of steps for each day and plot those in a histogram. 
 
+First, lets see what the data looks like, just the first few rows.
+
+```{r showfirstrows, echo = TRUE}
+head(activities);
+```
+
+So, the first column is the number of steps; we use that in our calculation of the totals:
+
+
+```{r sumstepsday, echo=TRUE}
+totalsteps <- aggregate(activities[,1], by = list(activities$date), sum);
+
+```
+
+Now we use the total in our historgram...
+```{r histogranmofstes, echo=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2);
+ggplot(totalsteps, aes(totalsteps$x)) + 
+  geom_histogram() + 
+  labs(title="Histogram of total steps per day", x="Number of steps per day");
+```
+
+The mean and median of the total steps per day are:
+```{r meanandmedian, echo=TRUE}
+mean(totalsteps$x, na.rm = TRUE)
+median(totalsteps$x, na.rm = TRUE)
+```
 
 ## What is the average daily activity pattern?
+
+The steps taken are measured at an interval of 5 minutes, we can use this to see how many steps were taken, on avarage, at a particular interval or moment. One expects less steps at night...
+
+```{r averageatinterval, echo=TRUE}
+library(scales)
+averageatinterval <- aggregate(activities[,1], by = list(activities$interval), mean, na.rm=TRUE);
+
+ggplot(averageatinterval,aes(Group.1, x))+geom_line() + 
+  labs(title="Average steps at an specific moment", x="Time", y="Steps taken") + 
+  scale_x_continuous(breaks=c(0, 600, 1200, 1800, 2400), 
+                     labels=c("00:00, Midnight",  "06:00", "12:00, Noon", "18:00", "24:00"))
+```
 
 
 
