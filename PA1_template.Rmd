@@ -29,16 +29,16 @@ We could calculate the mean for each day in one step, however we start by determ
 
 First, lets see what the data looks like, just the first few rows.
 
-```{r showfirstrows, echo = TRUE}
+```{r showfirstrows, echo=TRUE}
 head(activities);
 ```
 
 So, the first column is the number of steps; we use that in our calculation of the totals:
-
+We determine the total per day and the total steps measured.
 
 ```{r sumstepsday, echo=TRUE}
 totalsteps <- aggregate(activities[,1], by = list(activities$date), sum);
-
+sum(totalsteps$x, na.rm=TRUE)
 ```
 
 Now we use the total in our historgram...
@@ -51,8 +51,10 @@ ggplot(totalsteps, aes(totalsteps$x)) +
 
 The mean and median of the total steps per day are:
 ```{r meanandmedian, echo=TRUE}
-mean(totalsteps$x, na.rm = TRUE)
-median(totalsteps$x, na.rm = TRUE)
+meansteps   <- mean(totalsteps$x, na.rm = TRUE);
+meansteps;
+mediansteps <- median(totalsteps$x, na.rm = TRUE);
+mediansteps;
 ```
 
 ## What is the average daily activity pattern?
@@ -73,8 +75,9 @@ ggplot(averageatinterval,aes(Group.1, x)) +
 Determine the interval/moment of the maximum mean number of steps taken...
 The number of steps is x, the interval is Group.1
 
-```{r findmaxstesp, echo=TRUE}
-themoment  <- averageatinterval[averageatinterval$x == max(averageatinterval$x),]$Group.1
+```{r findmaxstep, echo=TRUE}
+themoment  <- averageatinterval[averageatinterval$x == max(averageatinterval$x),]$Group.1;
+themoment;
 
 ```
 
@@ -83,6 +86,53 @@ The interval at wich the maximum average of steps taken is at `r themoment`.
 
 ## Imputing missing values
 
+Check how many values are missing:
+
+```{r missingvalues, echo=TRUE}
+sum(is.na(activities))
+```
+
+Replace missing values with the mean number of steps per day divided over the number of intervals.
+One interval is 5 minutes. So total number of intervals is total number of minutes on one day divided over the interval.
+
+```{r replacemissingwithzero, echo=TRUE}
+numberofintervals <- 24 * 60 / 5;
+activities2 <- activities;
+activities2[is.na(activities2$steps),]$steps <- (meansteps / numberofintervals);
+```
+
+Lets see what impact this has. The total number of steps has increased...
+
+```{r sumstepsday2, echo=TRUE}
+totalsteps2 <- aggregate(activities2[,1], by = list(activities2$date), sum);
+sum(totalsteps2$x);
+```
+
+Now we use the total in our historgram...
+```{r histogranmofsteps2, echo=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2);
+ggplot(totalsteps2, aes(totalsteps2$x)) + 
+  geom_histogram() + 
+  labs(title="Histogram of total steps per day (missing values replaced)", x="Number of steps per day");
+```
+
+The mean and median of the total steps per day are:
+```{r meanandmedian2, echo=TRUE}
+meansteps2 <- mean(totalsteps2$x);
+meansteps2;
+mediansteps2 <- median(totalsteps2$x);
+mediansteps2;
+```
+
+So it looks like imputing the missing value with a mean has not much impact.
+
+```{r difference, echo=TRUE}
+
+diffmean   <- meansteps   - meansteps2;
+diffmedian <- mediansteps - mediansteps2;
+
+```
+The difference in the mean of the steps per day is `r diffmean` and difference in median `r diffmedian`.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
