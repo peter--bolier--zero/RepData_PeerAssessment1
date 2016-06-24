@@ -1,8 +1,11 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: Peter D. Bolier
+date: June 24, 2016
 output: 
-html_document:
-keep_md: true
+  html_document:
+    keep_md: true
+
 ---
 
 
